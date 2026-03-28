@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAlert } from "../context/AlertContext";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = "https://lostlink-wbtc.onrender.com";
 
 function Register() {
   const navigate = useNavigate();

@@ -7,6 +7,8 @@ function Match() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const API_URL = "https://lostlink-wbtc.onrender.com";
+
   const navigate = useNavigate();
   const { showAlert } = useAlert();
 
@@ -14,7 +16,7 @@ function Match() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await axios.get("http://localhost:5000/api/matches", {
+      const res = await axios.get(`${API_URL}/api/matches`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -33,8 +35,7 @@ function Match() {
     try {
       const token = localStorage.getItem("token");
 
-      await axios.post(
-        "http://localhost:5000/api/matches/confirm",
+      await axios.post(`${API_URL}/api/matches/confirm`,
         { matchId: id },
         {
           headers: {

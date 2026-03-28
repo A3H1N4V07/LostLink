@@ -19,7 +19,6 @@ export const AlertProvider = ({ children }) => {
     <AlertContext.Provider value={{ showAlert }}>
       {children}
 
-      {/* 🔥 Toast UI */}
       {alert && (
         <div
           style={{
@@ -46,7 +45,6 @@ export const AlertProvider = ({ children }) => {
         </div>
       )}
 
-      {/* Animation */}
       <style>
         {`
           @keyframes slideIn {

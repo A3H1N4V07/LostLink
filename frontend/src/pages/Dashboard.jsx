@@ -3,20 +3,17 @@ import axios from "axios";
 
 function Dashboard() {
   const [items, setItems] = useState([]);
+  const API_URL = "https://lostlink-wbtc.onrender.com";
 
   const fetchItems = async () => {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await axios.get(
-        "http://localhost:5000/api/items",
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      const res = await axios.get(`${API_URL}/api/items`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       setItems(res.data);
-
     } catch (err) {
       console.log("Error fetching items:", err);
     }
@@ -37,16 +34,14 @@ function Dashboard() {
       <div className="row">
         {items.map((item) => (
           <div className="col-md-4 mb-4" key={item._id}>
-
             <div
               className="card shadow-lg border-0 h-100"
               style={{
                 borderRadius: "12px",
                 overflow: "hidden",
-                transition: "0.3s"
+                transition: "0.3s",
               }}
             >
-
               {item.image ? (
                 <img
                   src={item.image}
@@ -54,7 +49,7 @@ function Dashboard() {
                   style={{
                     height: "200px",
                     width: "100%",
-                    objectFit: "cover"
+                    objectFit: "cover",
                   }}
                 />
               ) : (
@@ -65,40 +60,30 @@ function Dashboard() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    color: "#999"
+                    color: "#999",
                   }}
                 >
                   No Image
                 </div>
               )}
               <div className="card-body d-flex flex-column">
-                <h5 className="fw-bold mb-2">
-                  {item.title}
-                </h5>
+                <h5 className="fw-bold mb-2">{item.title}</h5>
 
-                <p className="text-muted flex-grow-1">
-                  {item.description}
-                </p>
+                <p className="text-muted flex-grow-1">{item.description}</p>
 
                 <div className="d-flex justify-content-between align-items-center mt-2">
-
-                  <span className={`badge ${
-                    item.type === "lost"
-                      ? "bg-danger"
-                      : "bg-success"
-                  }`}>
+                  <span
+                    className={`badge ${
+                      item.type === "lost" ? "bg-danger" : "bg-success"
+                    }`}
+                  >
                     {item.type}
                   </span>
 
-                  <span className="badge bg-secondary">
-                    {item.status}
-                  </span>
-
+                  <span className="badge bg-secondary">{item.status}</span>
                 </div>
               </div>
-
             </div>
-
           </div>
         ))}
       </div>

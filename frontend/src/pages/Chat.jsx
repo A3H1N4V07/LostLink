@@ -3,10 +3,9 @@ import axios from "axios";
 import { io } from "socket.io-client";
 import { useLocation } from "react-router-dom";
 
-const API_URL = import.meta.env.VITE_API_URL;
-const socket = io(API_URL, {
+const API_URL ="https://lostlink-wbtc.onrender.com";
+const socket = io("https://lostlink-wbtc.onrender.com", {
   transports: ["websocket"],
-  withCredentials: true
 });
 
 function Chat() {
