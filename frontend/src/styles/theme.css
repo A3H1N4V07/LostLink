@@ -1,0 +1,21 @@
+body {
+  background: #f5f7fb;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.card {
+  border-radius: 15px;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.btn {
+  border-radius: 10px;
+}
+
+.navbar {
+  border-radius: 0 0 15px 15px;
+}

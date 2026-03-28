@@ -1,0 +1,86 @@
+
+.home-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(90deg, #f3d6d0, #dff0c2);
+}
+
+.hero-title {
+  font-size: 48px;
+  font-weight: 700;
+}
+
+.highlight {
+  color: #2e7d32;
+}
+
+.hero-subtext {
+  color: #555;
+  margin-top: 10px;
+}
+
+.lost-btn {
+  background: #e74c3c;
+  color: white;
+  width: 180px;
+  border-radius: 8px;
+  padding: 10px;
+  font-weight: 500;
+}
+
+.found-btn {
+  background: #2ecc71;
+  color: white;
+  width: 180px;
+  border-radius: 8px;
+  padding: 10px;
+  font-weight: 500;
+}
+
+.lost-btn:hover {
+  background: #c0392b;
+}
+
+.found-btn:hover {
+  background: #27ae60;
+}
+
+.image-stack {
+  position: relative;
+  display: inline-block;
+}
+
+.img-main {
+  width: 220px;
+  border-radius: 10px;
+}
+
+.img-small {
+  position: absolute;
+  width: 100px;
+  border-radius: 8px;
+}
+
+.img-1 {
+  top: 40px;
+  right: -40px;
+}
+
+.img-2 {
+  bottom: -20px;
+  left: -40px;
+}
+
+/* FOOTER */
+.footer {
+  background: #f5f5f5;
+  font-size: 14px;
+}
+
+.footer h6 {
+  font-weight: 600;
+}
+
+.footer p {
+  margin: 4px 0;
+  color: #555;
+}
