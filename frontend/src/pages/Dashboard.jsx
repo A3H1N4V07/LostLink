@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL 
+  || (import.meta.env.PROD ? "https://lostlink-wbtc.onrender.com" : "http://localhost:5000");
+
 function Dashboard() {
   const [items, setItems] = useState([]);
-  const API_URL = "https://lostlink-wbtc.onrender.com";
 
   const fetchItems = async () => {
     try {

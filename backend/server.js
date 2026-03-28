@@ -1,5 +1,4 @@
 require("dotenv").config();
-
 const express = require("express");
 const cors = require("cors");
 const http = require("http");
@@ -11,23 +10,26 @@ app.set("trust proxy", 1);
 
 const server = http.createServer(app);
 
+
 const allowedOrigins = [
-  "http://localhost:5173",
-  "https://lost-link-xi.vercel.app" 
-];
+  "http://localhost:5173", 
+  "https://lost-link-xi.vercel.app", 
+  process.env.FRONTEND_URL 
+].filter(Boolean); 
 
-// app.use(cors({
-//   origin: allowedOrigins,
-//   credentials: true
-// }));
+// 1. Correct CORS for Express
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
 
+app.use(express.json());
+
+// 2. Correct CORS for Socket.io
 const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:5173",
-      "https://lost-link-xi.vercel.app"
-    ],
-    methods: ["GET", "POST"],
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true
   },
   transports: ["websocket", "polling"]
@@ -38,9 +40,6 @@ initSocket(io);
 
 const connectDB = require("./config/db");
 connectDB();
-
-app.use(cors());
-app.use(express.json());
 
 const authRoutes = require("./routes/authRoutes");
 const itemRoutes = require("./routes/itemRoutes");

@@ -3,11 +3,12 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAlert } from "../context/AlertContext";
 
+const API_URL = import.meta.env.VITE_API_URL 
+  || (import.meta.env.PROD ? "https://lostlink-wbtc.onrender.com" : "http://localhost:5000");
+
 function Match() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const API_URL = "https://lostlink-wbtc.onrender.com";
 
   const navigate = useNavigate();
   const { showAlert } = useAlert();

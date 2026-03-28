@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import MapPicker from "../components/MapPicker";
 import { useAlert } from "../context/AlertContext";
 
+const API_URL = import.meta.env.VITE_API_URL 
+  || (import.meta.env.PROD ? "https://lostlink-wbtc.onrender.com" : "http://localhost:5000");
+
 function Upload() {
   const navigate = useNavigate();
   const { showAlert } = useAlert();
@@ -89,7 +92,7 @@ function Upload() {
       }
 
       await axios.post(
-        `https://lostlink-wbtc.onrender.com/api/items`,
+        `${API_URL}/api/items`, 
         {
           title: form.title,
           description: form.description,

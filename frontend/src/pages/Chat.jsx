@@ -3,8 +3,10 @@ import axios from "axios";
 import { io } from "socket.io-client";
 import { useLocation } from "react-router-dom";
 
-const API_URL ="https://lostlink-wbtc.onrender.com";
-const socket = io("https://lostlink-wbtc.onrender.com", {
+const API_URL = import.meta.env.VITE_API_URL 
+  || (import.meta.env.PROD ? "https://lostlink-wbtc.onrender.com" : "http://localhost:5000");
+
+const socket = io(API_URL, {
   transports: ["websocket", "polling"],
   withCredentials: true,
 });
@@ -19,71 +21,62 @@ function Chat() {
 
   const user = JSON.parse(localStorage.getItem("user")) || {};
   const userId = user._id || user.id;
-
   const token = localStorage.getItem("token");
 
-  const getUserId = (user) => {
-    if (!user) return null;
-    if (typeof user === "object") return user._id;
-    return user;
+  const getUserId = (userObj) => {
+    if (!userObj) return null;
+    if (typeof userObj === "object") return userObj._id || userObj.id;
+    return userObj;
   };
 
   // Fetch matches
   const fetchMatches = async () => {
+    if (!token) return;
     try {
-      const res = await axios.get(
-        `${API_URL}/api/matches`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      const res = await axios.get(`${API_URL}/api/matches`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      const confirmed = res.data.filter(m => m.status === "confirmed");
+      const confirmed = res.data.filter((m) => m.status === "confirmed");
       setMatches(confirmed);
-
     } catch (err) {
-      console.log("Fetch matches error:", err);
+      console.error("Fetch matches error:", err);
     }
   };
 
   // Load messages
   const loadMessages = async (matchId) => {
     try {
-      const res = await axios.get(
-        `${API_URL}/api/messages/${matchId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
-
+      const res = await axios.get(`${API_URL}/api/messages/${matchId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setMessages(res.data);
-
     } catch (err) {
-      console.log("Load messages error:", err);
+      console.error("Load messages error:", err);
     }
   };
 
   useEffect(() => {
     fetchMatches();
 
+    // Listen for incoming messages
     socket.on("receiveMessage", (msg) => {
       setMessages((prev) => [...prev, msg]);
     });
 
-    return () => socket.off("receiveMessage");
+    return () => {
+      socket.off("receiveMessage");
+    };
   }, []);
 
   useEffect(() => {
     if (location.state?.matchId && matches.length > 0) {
-      const match = matches.find(
-        m => m.matchId === location.state.matchId
-      );
-
+      const match = matches.find((m) => m.matchId === location.state.matchId);
       if (match) {
         openChat(match);
       }
     }
-  }, [matches]);
+  }, [matches, location.state]);
 
   // Open chat
   const openChat = (match) => {
@@ -98,40 +91,43 @@ function Chat() {
 
     const lostUser = getUserId(activeMatch?.lostItem?.user);
     const foundUser = getUserId(activeMatch?.foundItem?.user);
-
     let receiverId = lostUser === userId ? foundUser : lostUser;
 
     if (!receiverId) return;
 
     try {
+      // 1. Save to Database
       await axios.post(
         `${API_URL}/api/messages/send`,
         {
           matchId: activeMatch.matchId,
           receiverId,
-          text
+          text,
         },
         {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
+      // 2. Emit to Socket
       socket.emit("sendMessage", {
         matchId: activeMatch.matchId,
         senderId: userId,
         receiverId,
-        text
+        text,
       });
 
       setText("");
-
     } catch (err) {
-      console.log("Send message error:", err);
+      console.error("Send message error:", err);
     }
   };
 
   return (
-    <div>Chat UI (same as your code)</div>
+    <div>
+
+      <h2>Chat Room</h2>
+    </div>
   );
 }
 

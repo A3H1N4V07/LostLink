@@ -4,7 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { useAlert } from "../context/AlertContext";
 
-const API_URL = "https://lostlink-wbtc.onrender.com";
+
+const API_URL = import.meta.env.VITE_API_URL 
+  || (import.meta.env.PROD ? "https://lostlink-wbtc.onrender.com" : "http://localhost:5000");
 
 function Login() {
   const navigate = useNavigate();
