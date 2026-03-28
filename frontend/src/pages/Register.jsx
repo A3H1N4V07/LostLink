@@ -27,11 +27,13 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    console.log("API_URL:", API_URL);
+
     try {
       setLoading(true);
 
       await axios.post(
-        `${API_URL}/api/auth/signup`,   // ✅ FIXED
+        `${API_URL}/api/auth/signup`,  
         form
       );
 

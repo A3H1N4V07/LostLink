@@ -4,7 +4,10 @@ import { io } from "socket.io-client";
 import { useLocation } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL;
-const socket = io(API_URL);
+const socket = io(API_URL, {
+  transports: ["websocket"],
+  withCredentials: true
+});
 
 function Chat() {
   const [matches, setMatches] = useState([]);
