@@ -5,7 +5,8 @@ import { useLocation } from "react-router-dom";
 
 const API_URL ="https://lostlink-wbtc.onrender.com";
 const socket = io("https://lostlink-wbtc.onrender.com", {
-  transports: ["websocket"],
+  transports: ["websocket", "polling"],
+  withCredentials: true,
 });
 
 function Chat() {

@@ -7,6 +7,8 @@ const { Server } = require("socket.io");
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 const server = http.createServer(app);
 
 const allowedOrigins = [
@@ -14,17 +16,21 @@ const allowedOrigins = [
   "https://lost-link-xi.vercel.app" 
 ];
 
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
-}));
+// app.use(cors({
+//   origin: allowedOrigins,
+//   credentials: true
+// }));
 
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: [
+      "http://localhost:5173",
+      "https://lost-link-xi.vercel.app"
+    ],
     methods: ["GET", "POST"],
     credentials: true
-  }
+  },
+  transports: ["websocket", "polling"]
 });
 
 const initSocket = require("./socket/socket");
