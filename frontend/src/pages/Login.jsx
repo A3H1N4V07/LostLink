@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { useAlert } from "../context/AlertContext";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function Login() {
   const navigate = useNavigate();
   const { setUser } = useContext(AuthContext);
@@ -35,20 +37,17 @@ function Login() {
       setLoading(true);
 
       const res = await axios.post(
-        "http://localhost:5000/api/auth/login",
+        `${API_URL}/api/auth/login`,  
         form
       );
 
-      // Save token
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
-      // Save globally
       setUser(res.data.user);
 
       showAlert("Login successful 🎉", "success");
 
-      // smooth redirect
       setTimeout(() => {
         navigate("/");
       }, 1000);
