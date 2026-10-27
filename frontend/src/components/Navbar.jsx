@@ -83,6 +83,10 @@ function Navbar() {
                 Matches
               </Link>
 
+              <Link to="/chat" className="text-decoration-none text-dark fw-medium mx-2">
+                Chat
+              </Link>
+
               <div
                 style={{
                   width: "32px",
