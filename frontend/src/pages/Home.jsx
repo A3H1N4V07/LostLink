@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import homeImg1 from "../assets/home1.webp";
 import homeImg2 from "../assets/home3.avif";
 import homeImg3 from "../assets/home2.jpg";
@@ -35,6 +35,11 @@ function Home() {
           .floating-img-1 { animation: popIn 0.6s ease-out 0.6s forwards, float 4s ease-in-out infinite 1.2s; opacity: 0; }
           .floating-img-2 { animation: popIn 0.6s ease-out 0.8s forwards, float 5s ease-in-out infinite 1.4s; opacity: 0; }
           .floating-img-3 { animation: popIn 0.6s ease-out 1.0s forwards, float 4.5s ease-in-out infinite 1.6s; opacity: 0; }
+
+          .footer-link { color: #6c757d; text-decoration: none; }
+          .footer-link:hover { color: #111; text-decoration: underline; }
+          .footer-social { width: 30px; height: 30px; color: #333; text-decoration: none; transition: 0.2s; }
+          .footer-social:hover { background-color: #e2e8f0 !important; color: #111; }
         `}
       </style>
 
@@ -150,38 +155,38 @@ function Home() {
               </div>
               <div className="col-md-2 mb-3">
                 <h6 className="fw-bold mb-3">Site</h6>
-                <div className="text-muted mb-1" style={{cursor: "pointer"}}>Lost</div>
-                <div className="text-muted mb-1" style={{cursor: "pointer"}}>Report Lost</div>
-                <div className="text-muted mb-1" style={{cursor: "pointer"}}>Found</div>
-                <div className="text-muted mb-1" style={{cursor: "pointer"}}>Report Found</div>
+                <Link to="/upload?type=lost" className="footer-link d-block mb-1">Lost</Link>
+                <Link to="/upload?type=lost" className="footer-link d-block mb-1">Report Lost</Link>
+                <Link to="/upload?type=found" className="footer-link d-block mb-1">Found</Link>
+                <Link to="/upload?type=found" className="footer-link d-block mb-1">Report Found</Link>
               </div>
               <div className="col-md-2 mb-3">
                 <h6 className="fw-bold mb-3">Help</h6>
-                <div className="text-muted mb-1" style={{cursor: "pointer"}}>Customer Support</div>
-                <div className="text-muted mb-1" style={{cursor: "pointer"}}>Terms & Conditions</div>
-                <div className="text-muted mb-1" style={{cursor: "pointer"}}>Privacy Policy</div>
+                <a href="mailto:sci.fi.th08@gmail.com" className="footer-link d-block mb-1">Customer Support</a>
+                <Link to="/terms" className="footer-link d-block mb-1">Terms &amp; Conditions</Link>
+                <Link to="/privacy" className="footer-link d-block mb-1">Privacy Policy</Link>
               </div>
               <div className="col-md-2 mb-3">
                 <h6 className="fw-bold mb-3">Links</h6>
-                <div className="text-muted mb-1" style={{cursor: "pointer"}}>LinkedIn</div>
-                <div className="text-muted mb-1" style={{cursor: "pointer"}}>Facebook</div>
-                <div className="text-muted mb-1" style={{cursor: "pointer"}}>YouTube</div>
-                <div className="text-muted mb-1" style={{cursor: "pointer"}}>About Us</div>
+                <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" className="footer-link d-block mb-1">LinkedIn</a>
+                <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" className="footer-link d-block mb-1">Facebook</a>
+                <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" className="footer-link d-block mb-1">YouTube</a>
+                <Link to="/about" className="footer-link d-block mb-1">About Us</Link>
               </div>
               <div className="col-md-3 mb-3">
                 <h6 className="fw-bold mb-3">Contact</h6>
-                <div className="text-muted mb-1">Tel : +94 716520690</div>
-                <div className="text-muted mb-3">Email : info@example.com</div>
+                <div className="text-muted mb-1">Tel : <a href="tel:+917234561262" className="footer-link">+91 7234561262</a></div>
+                <div className="text-muted mb-3">Email : <a href="mailto:sci.fi.th08@gmail.com" className="footer-link">sci.fi.th08@gmail.com</a></div>
                 <div className="d-flex gap-2">
-                  <span className="bg-light border rounded-circle d-flex align-items-center justify-content-center" style={{width:"30px", height:"30px", cursor: "pointer", transition: "0.2s"}} onMouseEnter={(e)=>e.target.style.backgroundColor="#e2e8f0"} onMouseLeave={(e)=>e.target.style.backgroundColor="#f8f9fa"}>X</span>
-                  <span className="bg-light border rounded-circle d-flex align-items-center justify-content-center" style={{width:"30px", height:"30px", cursor: "pointer", transition: "0.2s"}} onMouseEnter={(e)=>e.target.style.backgroundColor="#e2e8f0"} onMouseLeave={(e)=>e.target.style.backgroundColor="#f8f9fa"}>f</span>
-                  <span className="bg-light border rounded-circle d-flex align-items-center justify-content-center" style={{width:"30px", height:"30px", cursor: "pointer", transition: "0.2s"}} onMouseEnter={(e)=>e.target.style.backgroundColor="#e2e8f0"} onMouseLeave={(e)=>e.target.style.backgroundColor="#f8f9fa"}>in</span>
+                  <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="X" className="footer-social bg-light border rounded-circle d-flex align-items-center justify-content-center">X</a>
+                  <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="footer-social bg-light border rounded-circle d-flex align-items-center justify-content-center">f</a>
+                  <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="footer-social bg-light border rounded-circle d-flex align-items-center justify-content-center">in</a>
                 </div>
               </div>
             </div>
             <div className="text-center text-muted mt-4" style={{ fontSize: "0.75rem" }}>
-              © Copyright 2024 Lost and Found<br/>
-              All Right Reserved
+              © {new Date().getFullYear()} LostLink<br/>
+              All Rights Reserved
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import MapPicker from "../components/MapPicker";
 import { useAlert } from "../context/AlertContext";
 
@@ -11,10 +11,14 @@ function Upload() {
   const navigate = useNavigate();
   const { showAlert } = useAlert();
 
+  // /upload?type=found (from the home buttons and the footer) pre-selects the type
+  const [searchParams] = useSearchParams();
+  const typeFromUrl = searchParams.get("type") === "found" ? "found" : "lost";
+
   const [form, setForm] = useState({
     title: "",
     description: "",
-    type: "lost",
+    type: typeFromUrl,
     lat: "",
     lng: "",
     image: "",
@@ -23,6 +27,11 @@ function Upload() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+
+  // keep the type in sync when the URL changes while already on this page
+  useEffect(() => {
+    setForm((prev) => ({ ...prev, type: typeFromUrl }));
+  }, [typeFromUrl]);
 
   const handleChange = (e) => {
     setForm({
