@@ -1,30 +1,5 @@
 const Item = require("../models/Item");
-const { cosineSimilarity } = require("./cosine");
-
-// extract words
-const extractWords = (text) => {
-  if (!text) return [];
-  return text
-    .toLowerCase()
-    .replace(/[^\w\s]/g, "")
-    .split(" ")
-    .filter((w) => w.length > 2);
-};
-
-// title similarity
-const titleSimilarity = (t1, t2) => {
-  const w1 = extractWords(t1);
-  const w2 = extractWords(t2);
-
-  const set = new Set(w1);
-
-  let common = 0;
-  for (let w of w2) {
-    if (set.has(w)) common++;
-  }
-
-  return common / Math.max(w1.length, 1);
-};
+const { scorePair } = require("./scoring");
 
 exports.findMatches = async (newItem) => {
   try {
@@ -39,64 +14,24 @@ exports.findMatches = async (newItem) => {
           $maxDistance: 5000
         }
       }
-    });
+    }).limit(100);
 
     const matches = [];
 
     for (let item of nearbyItems) {
-
-      // distance
       const distance = calculateDistanceFromCoords(
         newItem.location.coordinates,
         item.location.coordinates
       );
 
-      // title similarity
-      const tScore = titleSimilarity(newItem.title, item.title);
-      if (tScore === 0) continue;
+      const result = scorePair(newItem, item, distance);
 
-      // embedding similarity (AI)
-      let embeddingScore = null;
-
-      if (newItem.embedding?.length && item.embedding?.length) {
-        embeddingScore = cosineSimilarity(
-          newItem.embedding,
-          item.embedding
-        );
-      }
-
-      // description fallback similarity
-      const descWords1 = extractWords(newItem.description);
-      const descWords2 = extractWords(item.description);
-
-      const commonDesc = descWords1.filter(w => descWords2.includes(w)).length;
-      const descScore = commonDesc / Math.max(descWords1.length, 1);
-
-      // distance score
-      const distanceScore = Math.max(0, 1 - distance / 5);
-
-      // FINAL HYBRID SCORE
-      let finalScore;
-
-      if (embeddingScore !== null) {
-        // AI MODE
-        finalScore =
-          0.5 * distanceScore +
-          0.3 * tScore +
-          0.2 * embeddingScore;
-      } else {
-        // FALLBACK MODE
-        finalScore =
-          0.5 * distanceScore +
-          0.3 * tScore +
-          0.2 * descScore;
-      }
-
-      if (finalScore > 0.4) {
+      if (result.passes) {
         matches.push({
           itemId: item._id,
-          score: finalScore,
-          distance
+          score: result.score,
+          distance,
+          mode: result.mode
         });
       }
     }
@@ -129,3 +64,5 @@ const calculateDistanceFromCoords = (c1, c2) => {
 
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
+
+exports.calculateDistanceFromCoords = calculateDistanceFromCoords;
