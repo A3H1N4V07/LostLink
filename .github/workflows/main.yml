@@ -3,6 +3,8 @@ name: CI Pipeline
 on:
   push:
     branches: ["main"]
+  pull_request:
+    branches: ["main"]
 
 jobs:
   build:
@@ -10,22 +12,29 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22 # same major as Render
 
       # Backend
       - name: Install backend dependencies
         working-directory: ./backend
-        run: npm install
+        run: npm ci
+
+      - name: Backend smoke test (modules load, scoring runs offline)
+        working-directory: ./backend
+        run: |
+          node -e "require('./controllers/itemController'); require('./controllers/matchController'); require('./controllers/messageController'); require('./socket/socket'); console.log('backend modules load')"
+          # provider=openai with no key skips the embedding section, so CI never downloads a model
+          EMBEDDING_PROVIDER=openai node eval/run.js
 
       # Frontend
       - name: Install frontend dependencies
         working-directory: ./frontend
-        run: npm install
+        run: npm ci
 
       - name: Build frontend
         working-directory: ./frontend
