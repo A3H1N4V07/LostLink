@@ -89,6 +89,8 @@ exports.confirmMatch = async (req, res) => {
       );
     }
 
+    console.log(`MATCH CONFIRM ${updated ? "confirmed" : "already confirmed"}`);
+
     res.json({ msg: "Match confirmed + items updated" });
 
   } catch (err) {

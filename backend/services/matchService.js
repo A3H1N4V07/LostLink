@@ -17,6 +17,7 @@ exports.findMatches = async (newItem) => {
     }).limit(100);
 
     const matches = [];
+    let bestRejected = null; // closest miss, so "why no match?" can be answered from the logs
 
     for (let item of nearbyItems) {
       const distance = calculateDistanceFromCoords(
@@ -33,8 +34,15 @@ exports.findMatches = async (newItem) => {
           distance,
           mode: result.mode
         });
+      } else if (!bestRejected || result.score > bestRejected.score) {
+        bestRejected = { score: result.score, mode: result.mode };
       }
     }
+
+    console.log(
+      `MATCH SEARCH candidates=${nearbyItems.length} matched=${matches.length}` +
+        (bestRejected ? ` best_rejected=${bestRejected.score.toFixed(2)}(${bestRejected.mode})` : "")
+    );
 
     matches.sort((a, b) => b.score - a.score);
 

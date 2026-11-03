@@ -56,7 +56,11 @@ exports.sendMessage = async (req, res) => {
 
     // deliver live to everyone in the room (the sender included) from what was actually saved
     const io = req.app.get("io");
-    if (io) io.to(String(access.match._id)).emit("receiveMessage", newMessage.toObject());
+    const room = String(access.match._id);
+    if (io) io.to(room).emit("receiveMessage", newMessage.toObject());
+
+    // no message text or ids in the log: only how many connected sockets received it
+    console.log(`MESSAGE SAVED delivered_to=${io?.sockets.adapter.rooms.get(room)?.size ?? 0} socket(s)`);
 
     res.status(201).json(newMessage);
 

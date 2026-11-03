@@ -21,9 +21,14 @@ const initSocket = (io) => {
       try {
         const access = await getMatchForUser(matchId, socket.userId);
 
-        if (!access || access.match.status !== "confirmed") return;
+        if (!access || access.match.status !== "confirmed") {
+          console.log("SOCKET JOIN REFUSED (not a participant or match not confirmed)");
+          return;
+        }
 
-        socket.join(String(access.match._id));
+        const room = String(access.match._id);
+        socket.join(room);
+        console.log(`SOCKET JOINED room_size=${io.sockets.adapter.rooms.get(room)?.size ?? 0}`);
       } catch (err) {
         console.log("joinRoom error:", err.message);
       }

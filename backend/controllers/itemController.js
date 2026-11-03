@@ -99,10 +99,16 @@ exports.createItem = async (req, res) => {
         mode: m.mode,
         status: "pending"
       });
+
+      console.log(`MATCH CREATED mode=${m.mode} score=${m.score.toFixed(2)} distance=${m.distance.toFixed(1)}km`);
     }
 
+    console.log(
+      `ITEM CREATED type=${type} aiUsed=${aiUsed} model=${aiUsed ? EMBEDDING_MODEL : "none"} matches=${matches.length}`
+    );
+
     res.json({
-      item: newItem,
+      item: { ...newItem.toObject(), embedding: undefined },
       matchesFound: matches.length,
       aiUsed
     });
@@ -116,7 +122,9 @@ exports.createItem = async (req, res) => {
 // GET USER ITEMS
 exports.getUserItems = async (req, res) => {
   try {
+    // the embedding vector is internal to matching; the client never needs it
     const items = await Item.find({ userId: req.user.id })
+      .select("-embedding")
       .sort({ createdAt: -1 });
 
     res.json(items);
