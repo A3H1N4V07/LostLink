@@ -15,8 +15,27 @@ exports.createItem = async (req, res) => {
     let { title, description, type, location, image } = req.body;
 
     //  VALIDATION
-    if (!title || !location || !location.lat || !location.lng) {
+    if (typeof title !== "string" || !title.trim() || !location) {
       return res.status(400).json({ msg: "Missing required fields" });
+    }
+
+    if (type !== "lost" && type !== "found") {
+      return res.status(400).json({ msg: "Type must be lost or found" });
+    }
+
+    // 0 is a valid coordinate, so check for numbers rather than truthiness
+    const lat = Number(location.lat);
+    const lng = Number(location.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+      return res.status(400).json({ msg: "Invalid location" });
+    }
+
+    if (title.length > 100 || (description && (typeof description !== "string" || description.length > 1000))) {
+      return res.status(400).json({ msg: "Title or description is too long" });
+    }
+
+    if (image && (typeof image !== "string" || image.length > 500 || !/^https:\/\//.test(image))) {
+      return res.status(400).json({ msg: "Invalid image" });
     }
 
     title = normalizeText(title);
@@ -25,7 +44,7 @@ exports.createItem = async (req, res) => {
     //  COMBINE TEXT FOR EMBEDDING ONLY
     const combinedText = `${title}. ${description}`;
 
-    // GENERATE EMBEDDING (OpenAI; null = failed, item falls back to word-overlap matching)
+    // GENERATE EMBEDDING (null = failed, item falls back to word-overlap matching)
     let embedding = [];
     try {
       embedding = (await getEmbedding(combinedText)) || [];
@@ -44,8 +63,8 @@ exports.createItem = async (req, res) => {
       location: {
         type: "Point",
         coordinates: [
-          parseFloat(location.lng), 
-          parseFloat(location.lat) 
+          lng,
+          lat
         ]
       },
       image,
