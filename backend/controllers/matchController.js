@@ -25,6 +25,8 @@ exports.getMatches = async (req, res) => {
   return {
     matchId: m._id,
     score: m.score,
+    distance: m.distance,
+    mode: m.mode,
     status: m.status,
 
     lostItem: isConfirmed

@@ -22,6 +22,12 @@ const itemSchema = new mongoose.Schema({
     default: []
   },
 
+  // which model produced the embedding ("" = none, item is matched by fallback)
+  embeddingModel: {
+    type: String,
+    default: ""
+  },
+
   // GEOJSON LOCATION (VERY IMPORTANT)
   location: {
     type: {

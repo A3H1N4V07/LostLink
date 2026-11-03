@@ -1,7 +1,7 @@
 const Item = require("../models/Item");
 const Match = require("../models/Match");
 const { findMatches } = require("../services/matchService");
-const { getEmbedding } = require("../services/aiService");
+const { getEmbedding, EMBEDDING_MODEL } = require("../services/aiService");
 
 //  normalize text
 const normalizeText = (text) => {
@@ -25,20 +25,22 @@ exports.createItem = async (req, res) => {
     //  COMBINE TEXT FOR EMBEDDING ONLY
     const combinedText = `${title}. ${description}`;
 
-    // GENERATE EMBEDDING (Gemini / AI)
+    // GENERATE EMBEDDING (OpenAI; null = failed, item falls back to word-overlap matching)
     let embedding = [];
     try {
-      embedding = await getEmbedding(combinedText);
+      embedding = (await getEmbedding(combinedText)) || [];
     } catch (err) {
       console.log("Embedding failed:", err.message);
     }
+    const aiUsed = embedding.length > 0;
 
     // CREATE ITEM (WITH GEOJSON)
     const newItem = await Item.create({
       title,
       description,
       type,
-      embedding, 
+      embedding,
+      embeddingModel: aiUsed ? EMBEDDING_MODEL : "",
       location: {
         type: "Point",
         coordinates: [
@@ -74,14 +76,16 @@ exports.createItem = async (req, res) => {
         foundItemId:
           newItem.type === "found" ? newItem._id : m.itemId,
         score: m.score,
-        distance: m.distance, 
+        distance: m.distance,
+        mode: m.mode,
         status: "pending"
       });
     }
 
     res.json({
       item: newItem,
-      matchesFound: matches.length
+      matchesFound: matches.length,
+      aiUsed
     });
 
   } catch (err) {

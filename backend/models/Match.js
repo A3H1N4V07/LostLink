@@ -11,6 +11,15 @@ const matchSchema = new mongoose.Schema({
   },
   score: Number,
 
+  // km between the two items when the match was created
+  distance: Number,
+
+  // which signal drove the semantic part of the score: "ai" (embeddings) or "fallback" (word overlap)
+  mode: {
+    type: String,
+    enum: ["ai", "fallback"]
+  },
+
   status: {
     type: String,
     default: "pending"
