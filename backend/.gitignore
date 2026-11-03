@@ -24,3 +24,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# matching evaluation cache
+eval/.embeddings-cache.json
