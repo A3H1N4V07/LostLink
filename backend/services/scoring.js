@@ -13,8 +13,10 @@ const TIME_HALF_LIFE_DAYS = 7;
 // eval/pairs.json (same item >= 0.61, different item mostly <= 0.52 for MiniLM). Models with no
 // profile use DEFAULT_PROFILE and should be calibrated with 'npm run eval:matching' before trust.
 const PROFILES = {
-  "local:Xenova/all-MiniLM-L6-v2": { floor: 0.35, ceil: 0.85 },
-  "openai:text-embedding-3-small": { floor: 0.2, ceil: 0.8 }
+  "local:Xenova/all-MiniLM-L6-v2": { floor: 0.35, ceil: 0.85, threshold: 0.5 },
+  "openai:text-embedding-3-small": { floor: 0.2, ceil: 0.8 },
+  // Gemini scores run high: different items 0.72-0.89, same item 0.87-0.99 on eval/pairs.json
+  "gemini:gemini-embedding-001": { floor: 0.75, ceil: 1.0, threshold: 0.55 }
 };
 const DEFAULT_PROFILE = { floor: 0.3, ceil: 0.85 };
 
@@ -60,13 +62,16 @@ const scorePair = (a, b, distanceKm) => {
 
   let semantic;
   let mode;
+  let threshold = THRESHOLDS.fallback;
 
   // vectors from different models (or sizes) are not comparable, so they fall back to words
   const sameModel = (a.embeddingModel || "") === (b.embeddingModel || "");
 
   if (hasVector(a) && hasVector(b) && sameModel && a.embedding.length === b.embedding.length) {
     mode = "ai";
-    const { floor, ceil } = PROFILES[a.embeddingModel] || DEFAULT_PROFILE;
+    const profile = PROFILES[a.embeddingModel] || DEFAULT_PROFILE;
+    const { floor, ceil } = profile;
+    threshold = profile.threshold ?? THRESHOLDS.ai;
     semantic = clamp01((cosineSimilarity(a.embedding, b.embedding) - floor) / (ceil - floor));
   } else {
     mode = "fallback";
@@ -90,7 +95,7 @@ const scorePair = (a, b, distanceKm) => {
     WEIGHTS.distance * distanceScore +
     WEIGHTS.time * timeScore;
 
-  const passes = Math.max(semantic, titleScore) >= MIN_CONTENT && score > THRESHOLDS[mode];
+  const passes = Math.max(semantic, titleScore) >= MIN_CONTENT && score > threshold;
 
   return {
     score,
