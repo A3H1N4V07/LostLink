@@ -7,9 +7,13 @@ import { useAlert } from "../context/AlertContext";
 const API_URL = import.meta.env.VITE_API_URL
   || (import.meta.env.PROD ? "https://lostlink-wbtc.onrender.com" : "http://localhost:5000");
 
+// The server only accepts sockets that carry a valid login token. The token is read on every
+// (re)connect, and the socket connects only while the chat page is open (see effect 0).
 const socket = io(API_URL, {
   transports: ["websocket", "polling"],
   withCredentials: true,
+  autoConnect: false,
+  auth: (cb) => cb({ token: localStorage.getItem("token") }),
 });
 
 const getUserId = (userObj) => {
@@ -45,6 +49,17 @@ function Chat() {
     activeId ?? (matches.some((m) => m.matchId === requestedId) ? requestedId : null);
   const selected = matches.find((m) => m.matchId === selectedId) || null;
   const messages = thread.matchId === selectedId ? thread.list : [];
+
+  // 0. Open the live connection while this page is shown
+  useEffect(() => {
+    if (!token) return;
+
+    socket.connect();
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [token]);
 
   // 1. Load the user's confirmed matches (only confirmed matches can chat)
   useEffect(() => {
@@ -126,21 +141,12 @@ function Chat() {
     try {
       setSending(true);
 
-      // 1. Save to the database (so the history survives a refresh)
+      // The server saves the message, then pushes it to everyone in the room (me included)
       await axios.post(
         `${API_URL}/api/messages/send`,
         { matchId: selected.matchId, receiverId, text: body },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      // 2. Broadcast to everyone in the room (including me) for instant delivery
-      socket.emit("sendMessage", {
-        matchId: selected.matchId,
-        senderId: userId,
-        receiverId,
-        text: body,
-        createdAt: new Date().toISOString(),
-      });
 
       setText("");
     } catch (err) {

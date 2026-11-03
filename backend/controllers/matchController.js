@@ -1,96 +1,98 @@
 const Match = require("../models/Match");
+const Item = require("../models/Item");
+const { getMatchForUser } = require("../services/matchAccess");
 
 // GET USER MATCHES
 exports.getMatches = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const matches = await Match.find()
-      .populate("lostItemId")
-      .populate("foundItemId");
+    // only this user's matches, found through their own items (not the whole collection)
+    const myItemIds = await Item.find({ userId }).distinct("_id");
 
-    const filtered = matches.filter(m => {
-      if (!m.lostItemId || !m.foundItemId) return false;
+    const matches = await Match.find({
+      $or: [
+        { lostItemId: { $in: myItemIds } },
+        { foundItemId: { $in: myItemIds } }
+      ]
+    })
+      .populate({ path: "lostItemId", select: "-embedding" })
+      .populate({ path: "foundItemId", select: "-embedding" });
 
-      return (
-        m.lostItemId.userId.toString() === userId ||
-        m.foundItemId.userId.toString() === userId
-      );
-    });
+    const filtered = matches.filter(m => m.lostItemId && m.foundItemId);
 
     // privacy logic
-   const response = filtered.map(m => {
-  const isConfirmed = m.status === "confirmed";
+    const response = filtered.map(m => {
+      const isConfirmed = m.status === "confirmed";
 
-  return {
-    matchId: m._id,
-    score: m.score,
-    distance: m.distance,
-    mode: m.mode,
-    status: m.status,
+      return {
+        matchId: m._id,
+        score: m.score,
+        distance: m.distance,
+        mode: m.mode,
+        status: m.status,
 
-    lostItem: isConfirmed
-      ? {
-          ...m.lostItemId.toObject(),
-          user: m.lostItemId.userId
-        }
-      : {
-          title: m.lostItemId.title,
-          type: m.lostItemId.type,
-          image: m.lostItemId.image
-        },
+        lostItem: isConfirmed
+          ? {
+              ...m.lostItemId.toObject(),
+              user: m.lostItemId.userId
+            }
+          : {
+              title: m.lostItemId.title,
+              type: m.lostItemId.type,
+              image: m.lostItemId.image
+            },
 
-    foundItem: isConfirmed
-      ? {
-          ...m.foundItemId.toObject(),
-          user: m.foundItemId.userId
-        }
-      : {
-          title: m.foundItemId.title,
-          type: m.foundItemId.type,
-          image: m.foundItemId.image
-        }
-  };
-});
+        foundItem: isConfirmed
+          ? {
+              ...m.foundItemId.toObject(),
+              user: m.foundItemId.userId
+            }
+          : {
+              title: m.foundItemId.title,
+              type: m.foundItemId.type,
+              image: m.foundItemId.image
+            }
+      };
+    });
 
     res.json(response);
 
   } catch (err) {
     console.log("MATCH ERROR:", err.message);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ msg: "Something went wrong" });
   }
 };
 
 // CONFIRM MATCH
 exports.confirmMatch = async (req, res) => {
   try {
-    const { matchId } = req.body;
+    const access = await getMatchForUser(req.body.matchId, req.user.id);
 
-    const match = await Match.findById(matchId)
-      .populate("lostItemId")
-      .populate("foundItemId");
-
-    if (!match) {
+    // same answer whether the match does not exist or belongs to someone else
+    if (!access) {
       return res.status(404).json({ msg: "Match not found" });
     }
 
-    // Updating match status
-    match.status = "confirmed";
-    await match.save();
+    const { match } = access;
 
-    const Item = require("../models/Item");
+    // only one request can move a match from pending to confirmed
+    const updated = await Match.findOneAndUpdate(
+      { _id: match._id, status: "pending" },
+      { status: "confirmed" }
+    );
 
-    await Item.findByIdAndUpdate(match.lostItemId._id, {
-      status: "matched"
-    });
-
-    await Item.findByIdAndUpdate(match.foundItemId._id, {
-      status: "matched"
-    });
+    if (updated) {
+      await Item.updateMany(
+        { _id: { $in: [match.lostItemId._id, match.foundItemId._id] } },
+        { status: "matched" }
+      );
+    }
 
     res.json({ msg: "Match confirmed + items updated" });
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.log("CONFIRM ERROR:", err.message);
+    res.status(500).json({ msg: "Something went wrong" });
   }
 };

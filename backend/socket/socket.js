@@ -1,35 +1,36 @@
-const Match = require("../models/Match");
+const { verifyToken } = require("../middleware/authMiddleware");
+const { getMatchForUser } = require("../services/matchAccess");
 
 const initSocket = (io) => {
+  // 1. Every connection must carry a valid JWT; the user id comes from the token, never from the client
+  io.use((socket, next) => {
+    try {
+      const decoded = verifyToken(socket.handshake.auth?.token);
+      socket.userId = decoded.id;
+      next();
+    } catch (err) {
+      next(new Error("Unauthorized"));
+    }
+  });
+
   io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
 
-    // Join Room
-    socket.on("joinRoom", (matchId) => {
-      socket.join(matchId);
-      console.log("Joined room:", matchId);
-    });
-
-    // Send Message (ONLY BROADCAST)
-    socket.on("sendMessage", async (data) => {
+    // 2. A user can only join the room of a confirmed match they belong to
+    socket.on("joinRoom", async (matchId) => {
       try {
-        const { matchId } = data;
+        const access = await getMatchForUser(matchId, socket.userId);
 
-        //  Check match status
-        const match = await Match.findById(matchId);
+        if (!access || access.match.status !== "confirmed") return;
 
-        if (!match || match.status !== "confirmed") {
-          console.log("Chat blocked: match not confirmed");
-          return;
-        }
-
-        // Broadcast message
-        io.to(matchId).emit("receiveMessage", data);
-
+        socket.join(String(access.match._id));
       } catch (err) {
-        console.log(err);
+        console.log("joinRoom error:", err.message);
       }
     });
+
+    // Messages are delivered by the REST endpoint after they are saved, so there is
+    // deliberately no client-driven "sendMessage" event: it could be spoofed or never saved.
 
     socket.on("disconnect", () => {
       console.log("User disconnected");
