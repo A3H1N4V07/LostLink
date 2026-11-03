@@ -40,7 +40,8 @@ exports.getMatches = async (req, res) => {
           : {
               title: m.lostItemId.title,
               type: m.lostItemId.type,
-              image: m.lostItemId.image
+              // the photo itself is withheld until the match is confirmed
+              hasImage: Boolean(m.lostItemId.image)
             },
 
         foundItem: isConfirmed
@@ -51,7 +52,7 @@ exports.getMatches = async (req, res) => {
           : {
               title: m.foundItemId.title,
               type: m.foundItemId.type,
-              image: m.foundItemId.image
+              hasImage: Boolean(m.foundItemId.image)
             }
       };
     });

@@ -6,6 +6,37 @@ import { useAlert } from "../context/AlertContext";
 const API_URL = import.meta.env.VITE_API_URL 
   || (import.meta.env.PROD ? "https://lostlink-wbtc.onrender.com" : "http://localhost:5000");
 
+// Before a match is confirmed the server does not send the photo at all (only hasImage),
+// so there is nothing to un-blur: show a placeholder instead.
+function MatchPhoto({ item, confirmed, alt }) {
+  if (confirmed) {
+    if (!item.image) return null;
+
+    return (
+      <div className="mb-2">
+        <img
+          src={item.image}
+          alt={alt}
+          className="img-fluid rounded"
+          style={{ maxHeight: "150px", objectFit: "cover", width: "100%" }}
+        />
+      </div>
+    );
+  }
+
+  if (!item.hasImage) return null;
+
+  return (
+    <div
+      className="mb-2 d-flex flex-column justify-content-center align-items-center rounded"
+      style={{ height: "150px", background: "#e9ecef", color: "#555", fontWeight: "bold" }}
+    >
+      <span style={{ fontSize: "28px" }}>📷</span>
+      <span>Confirm to View</span>
+    </div>
+  );
+}
+
 function Match() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -132,66 +163,14 @@ function Match() {
               <h6 className="fw-bold">Lost Item</h6>
               <p><strong>{m.lostItem.title}</strong></p>
 
-              {m.lostItem.image && (
-                <div className="position-relative mb-2">
-                  <img
-                    src={m.lostItem.image}
-                    alt="lost"
-                    className="img-fluid rounded"
-                    style={{
-                      maxHeight: "150px",
-                      objectFit: "cover",
-                      width: "100%",
-                      filter: m.status === "confirmed" ? "none" : "blur(8px)",
-                    }}
-                  />
-
-                  {m.status !== "confirmed" && (
-                    <div className="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
-                      style={{
-                        background: "rgba(0,0,0,0.4)",
-                        color: "#fff",
-                        fontWeight: "bold",
-                        borderRadius: "8px"
-                      }}>
-                      Confirm to View
-                    </div>
-                  )}
-                </div>
-              )}
+              <MatchPhoto item={m.lostItem} confirmed={m.status === "confirmed"} alt="lost" />
 
               <p className="text-muted small">{m.lostItem.description}</p>
 
               <h6 className="fw-bold mt-3">Found Item</h6>
               <p><strong>{m.foundItem.title}</strong></p>
 
-              {m.foundItem.image && (
-                <div className="position-relative mb-2">
-                  <img
-                    src={m.foundItem.image}
-                    alt="found"
-                    className="img-fluid rounded"
-                    style={{
-                      maxHeight: "150px",
-                      objectFit: "cover",
-                      width: "100%",
-                      filter: m.status === "confirmed" ? "none" : "blur(8px)",
-                    }}
-                  />
-
-                  {m.status !== "confirmed" && (
-                    <div className="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
-                      style={{
-                        background: "rgba(0,0,0,0.4)",
-                        color: "#fff",
-                        fontWeight: "bold",
-                        borderRadius: "8px"
-                      }}>
-                      Confirm to View
-                    </div>
-                  )}
-                </div>
-              )}
+              <MatchPhoto item={m.foundItem} confirmed={m.status === "confirmed"} alt="found" />
 
               <p className="text-muted small">{m.foundItem.description}</p>
 
