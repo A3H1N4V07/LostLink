@@ -34,7 +34,7 @@ function About() {
       <h5 className="fw-bold mt-4">Built with</h5>
       <p>
         React and Bootstrap on the front end; Node.js, Express and Socket.io on the back end;
-        MongoDB for data and location search; OpenAI for text embeddings; Cloudinary for photos;
+        MongoDB for data and location search; Google Gemini for text embeddings; Cloudinary for photos;
         and OpenStreetMap with Leaflet for the map.
       </p>
 

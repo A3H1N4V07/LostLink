@@ -52,7 +52,7 @@ function Privacy() {
       <p>LostLink relies on a few services to work:</p>
       <ul>
         <li>
-          <strong>OpenAI:</strong> the title and description of an item are sent to create a
+          <strong>Google (Gemini API):</strong> the title and description of an item are sent to create a
           numeric "meaning" of the text, which is used to find similar items.
         </li>
         <li>
